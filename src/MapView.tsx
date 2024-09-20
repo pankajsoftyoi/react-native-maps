@@ -179,6 +179,34 @@ export type MapViewProps = ViewProps & {
   googleMapId?: string;
 
   /**
+       * boundaryPlaceId for render map style boundary
+       */
+  boundaryPlaceId?: string;
+  /**
+   * The fill color to use for the path.
+   *
+   * @default `#000`, `rgba(r,g,b,0.5)`
+   * @platform iOS: Supported
+   * @platform Android: Supported
+   */
+  boundaryFillColor?: string;
+  /**
+   * The stroke color to use for the path.
+   *
+   * @default `#000`, `rgba(r,g,b,0.5)`
+   * @platform iOS: Supported
+   * @platform Android: Supported
+   */
+  boundaryStrokeColor?: string;
+  /**
+   * The stroke width to use for the path.
+   *
+   * @default 0
+   * @platform iOS: Supported
+   * @platform Android: Supported
+   */
+  boundaryStrokeWidth?: number;
+  /**
    * https://developers.google.com/maps/documentation/android-sdk/renderer
    * google maps renderer
    * @default `LATEST`

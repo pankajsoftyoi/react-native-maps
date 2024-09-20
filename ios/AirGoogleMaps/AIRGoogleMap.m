@@ -69,6 +69,13 @@ id regionAsJSON(MKCoordinateRegion region) {
   BOOL _didCallOnMapReady;
   BOOL _zoomTapEnabled;
   NSString* _googleMapId;
+  NSString* _boundaryPlaceId;
+  UIColor* _boundaryStrokeColor;
+  double _boundaryStrokeWidth;
+  UIColor* _boundaryFillColor;
+  GMSFeatureLayer<GMSPlaceFeature *> *layer;
+  GMSFeatureStyle *noStyle;
+  GMSFeatureStyle *boundaryStyle;
 }
 
 - (instancetype)initWithMapId:(NSString *)mapId andZoomTapEnabled:(BOOL)zoomTapEnabled
@@ -101,6 +108,9 @@ id regionAsJSON(MKCoordinateRegion region) {
     _didPrepareMap = false;
     _didCallOnMapReady = false;
     _zoomTapEnabled = zoomTapEnabled;
+    layer = [self featureLayerOfFeatureType:GMSFeatureTypeLocality];
+    noStyle = [GMSFeatureStyle styleWithFillColor:nil strokeColor:nil strokeWidth:0.0];
+    boundaryStyle = [GMSFeatureStyle styleWithFillColor:nil strokeColor:nil strokeWidth:0.0];
 
     // Listen to the myLocation property of GMSMapView.
     [self addObserver:self
@@ -310,6 +320,28 @@ id regionAsJSON(MKCoordinateRegion region) {
     _googleMapId = googleMapId;
 }
 
+- (void) setBoundaryPlaceId:(NSString *) placeId {
+    _boundaryPlaceId = placeId;
+}
+
+-(void)setBoundaryStrokeColor:(UIColor *)strokeColor
+{
+  _boundaryStrokeColor = strokeColor;
+    boundaryStyle = [GMSFeatureStyle styleWithFillColor:_boundaryFillColor strokeColor:_boundaryStrokeColor strokeWidth:_boundaryStrokeWidth];
+}
+
+-(void)setBoundaryStrokeWidth:(double)strokeWidth
+{
+  _boundaryStrokeWidth = strokeWidth;
+    boundaryStyle = [GMSFeatureStyle styleWithFillColor:_boundaryFillColor strokeColor:_boundaryStrokeColor strokeWidth:_boundaryStrokeWidth];
+}
+
+-(void)setBoundaryFillColor:(UIColor *)fillColor
+{
+  _boundaryFillColor = fillColor;
+    boundaryStyle = [GMSFeatureStyle styleWithFillColor:_boundaryFillColor strokeColor:_boundaryStrokeColor strokeWidth:_boundaryStrokeWidth];
+}
+
 - (void)setCameraProp:(GMSCameraPosition*)camera {
     _initialCamera = camera;
     self.camera = camera;
@@ -324,14 +356,22 @@ id regionAsJSON(MKCoordinateRegion region) {
 }
 
 - (void)didPrepareMap {
-  UIView* mapView = [self valueForKey:@"mapView"]; //GMSVectorMapView
-  [self overrideGestureRecognizersForView:mapView];
+//  UIView* mapView = [self valueForKey:@"mapView"]; //GMSVectorMapView
+//  [self overrideGestureRecognizersForView:mapView];
+    [self overrideGestureRecognizersForView:self];
 
   if (!_didCallOnMapReady && self.onMapReady) {
     self.onMapReady(@{});
     _didCallOnMapReady = true;
   }
   _didPrepareMap = true;
+  layer.style = ^(GMSPlaceFeature *feature) {
+      if (self->_boundaryPlaceId != nil) {
+          return [feature.placeID isEqual:self->_boundaryPlaceId] ? self->boundaryStyle : nil;
+      } else {
+          return self->noStyle;
+      }
+  };
 }
 
 - (void)mapViewDidFinishTileRendering {
